@@ -2,26 +2,39 @@ package fr.perso.movieQuizz.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import fr.perso.movieQuizz.model.Movie;
+import fr.perso.movieQuizz.service.MovieService;
 import org.eclipse.jetty.websocket.jsr356.annotations.Param;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 
 import javax.imageio.stream.FileImageOutputStream;
+import java.awt.*;
 import java.util.*;
 
 @RestController
+@RequestMapping(value = "/movie")
 public class MovieController {
 
-    @GetMapping(value = "/hello")
-    public String getHello() {
-        return "hello";
+    @Autowired
+    private MovieService movieService;
+
+    @GetMapping(value = "/find")
+    public Movie getMovie(@RequestParam int id) {
+        return movieService.getMovie(id);
     }
 
-    @GetMapping(value = "/film")
-    private Movie getFilm(@RequestParam int id)
+    @PostMapping("/save")
+    public Movie postFilm(@RequestBody Movie movie) {
+        return movieService.saveMovie(movie);
+    }
+
+    /*
+    EXTERNAL API REQUESTS
+     */
+    @GetMapping(value = "/findExternalAPI")
+    private Movie getFilmExternalAPI(@RequestParam int id)
     {
         final String uri = "https://api.themoviedb.org/3/movie/"+id+"?api_key=b82973427eb927f7cf6d2f6519aca43d";
 
@@ -31,7 +44,7 @@ public class MovieController {
         return result;
     }
 
-    @GetMapping(value = "/filmRandom")
+    @GetMapping(value = "/RandomExternalAPI")
     private Object getRandomFilm() throws JsonProcessingException {
         String uri = "https://api.themoviedb.org/3/movie/popular?api_key=b82973427eb927f7cf6d2f6519aca43d&page=";
         Random random = new Random();
@@ -43,6 +56,7 @@ public class MovieController {
         Object result = restTemplate.getForObject(uri, Object.class);
 
         return result;
+
     }
 
 }
